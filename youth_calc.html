@@ -148,6 +148,54 @@
     const interest = document.getElementById("interest");
     interest.value = bank.value;
   }
+
+  function calculateAll() {
+    const income = parseFloat(document.getElementById("income").value);
+    const monthly = parseFloat(document.getElementById("monthly").value);
+    const interest = parseFloat(document.getElementById("interest").value);
+
+    if (isNaN(income) || isNaN(monthly) || isNaN(interest)) {
+      alert("모든 항목을 올바르게 입력해주세요.");
+      return;
+    }
+
+    const months = 60;
+    const totalSaved = monthly * months;
+    const interestRate = interest / 100;
+    const totalInterest = totalSaved * interestRate;
+    const govSupport = Math.min(396, months * 3.3);
+    const total = totalSaved + totalInterest + govSupport;
+
+    const output = document.getElementById("output");
+    output.style.display = "block";
+    output.innerHTML = `
+      <p>총 납입금액: <span class="highlight">${totalSaved.toLocaleString()} 만원</span></p>
+      <p>예상 이자 수익: <span class="highlight">${totalInterest.toLocaleString(undefined, {maximumFractionDigits:1})} 만원</span></p>
+      <p>정부기여금(예상): <span class="highlight">${govSupport.toLocaleString()} 만원</span></p>
+      <p><strong>총 수령 예상액: <span class="highlight">${total.toLocaleString(undefined, {maximumFractionDigits:1})} 만원</span></strong></p>
+    `;
+
+    const ctx = document.getElementById("resultChart").getContext("2d");
+    document.getElementById("resultChart").style.display = "block";
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['총 납입금액', '이자 수익', '정부기여금'],
+        datasets: [{
+          data: [totalSaved, totalInterest, govSupport],
+          backgroundColor: ['#1a73e8', '#34a853', '#fbbc05'],
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  }
 </script>
 </body>
 </html>
