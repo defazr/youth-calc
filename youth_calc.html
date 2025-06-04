@@ -122,14 +122,14 @@
   </div>
 
   <div class="section">
-    <label for="bank">은행 선택 <span class="tooltip">ⓘ<span class="tooltiptext">기본금리 4.5% + 우대금리(최대 1.0%) = 최대 5.5%<br>※ 우대금리 예시: 사회초년생, 급여이체, 자동이체, 체크카드 실적 등</span></span></label>
+    <label for="bank">은행 선택 <span class="tooltip">ⓘ<span class="tooltiptext">은행별 기본금리와 우대금리 포함</span></span></label>
     <select id="bank" onchange="updateRate()">
       <option value="">-- 은행 선택 --</option>
-      <option value="5.5">NH농협은행 (기본 4.5% + 우대 1.0%)</option>
-      <option value="5.5">신한은행 (기본 4.5% + 우대 1.0%)</option>
-      <option value="5.5">우리은행 (기본 4.5% + 우대 1.0%)</option>
-      <option value="5.5">하나은행 (기본 4.5% + 우대 1.0%)</option>
-      <option value="5.5">IBK기업은행 (기본 4.5% + 우대 1.0%)</option>
+      <option value="5.1">NH농협은행 (기본 4.20% + 우대 0.90%)</option>
+      <option value="5.0">신한은행 (기본 4.00% + 우대 1.00%)</option>
+      <option value="4.9">우리은행 (기본 4.10% + 우대 0.80%)</option>
+      <option value="5.0">하나은행 (기본 4.15% + 우대 0.85%)</option>
+      <option value="5.0">IBK기업은행 (기본 4.05% + 우대 0.95%)</option>
     </select>
 
     <label for="interest">예상 연 이자율 (%)</label>
@@ -148,71 +148,6 @@
     const interest = document.getElementById("interest");
     interest.value = bank.value;
   }
-
-  function calculateAll() {
-    const income = parseFloat(document.getElementById("income").value);
-    const monthly = parseFloat(document.getElementById("monthly").value);
-    const interest = parseFloat(document.getElementById("interest").value);
-    const output = document.getElementById("output");
-    const chart = document.getElementById("resultChart");
-
-    if (isNaN(income) || isNaN(monthly) || monthly < 0.1 || monthly > 70) {
-      output.style.display = "block";
-      output.innerHTML = "❗ 올바른 값을 입력해주세요 (월납입금 0.1~70만원).";
-      chart.style.display = "none";
-      return;
-    }
-
-    let support = 0;
-    if (income <= 2400) { support = monthly * 0.06; if (support > 3.3) support = 3.3; }
-    else if (income <= 3600) { support = monthly * 0.058; if (support > 2.9) support = 2.9; }
-    else if (income <= 4800) { support = monthly * 0.05; if (support > 2.52) support = 2.52; }
-    else if (income <= 6000) { support = monthly * 0.03; if (support > 2.1) support = 2.1; }
-    else {
-      output.style.display = "block";
-      output.innerHTML = "❌ 총급여가 6,000만원을 초과하면 정부기여금은 지급되지 않습니다.";
-      chart.style.display = "none";
-      return;
-    }
-
-    const totalSupport = support * 12 * 5 * 10000;
-    const totalMySaving = monthly * 12 * 5 * 10000;
-    const totalPrincipal = totalSupport + totalMySaving;
-    const yearlyRate = interest / 100;
-    const totalInterest = totalPrincipal * Math.pow(1 + yearlyRate, 5) - totalPrincipal;
-
-    output.style.display = "block";
-    output.innerHTML =
-      `<p>✔️ 소득구간에 따른 월 정부기여금: <span class="highlight">${support.toFixed(2)}만원</span></p>` +
-      `<p>📆 5년간 총 정부기여금: <span class="highlight">${Math.round(totalSupport).toLocaleString()}원</span></p>` +
-      `<p>💵 내가 납입한 총액: <span class="highlight">${Math.round(totalMySaving).toLocaleString()}원</span></p>` +
-      `<p>📊 총 원금(기여금+납입액): <span class="highlight">${Math.round(totalPrincipal).toLocaleString()}원</span></p>` +
-      `<p>📈 5년간 예상 수령이자 (비과세 적용): <span class="highlight">${Math.round(totalInterest).toLocaleString()}원</span></p>` +
-      `<p>✅ 선택한 은행의 이자율은 연 <span class="highlight">${interest}%</span> 기준이며, 이자소득세는 전액 비과세입니다!</p>`;
-
-    chart.style.display = "block";
-    const ctx = chart.getContext('2d');
-    if (window.resultChart && typeof window.resultChart.destroy === 'function') {
-      window.resultChart.destroy();
-    }
-    window.resultChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['정부기여금', '내 납입액', '예상이자'],
-        datasets: [{
-          label: '금액 (원)',
-          data: [totalSupport, totalMySaving, totalInterest],
-          backgroundColor: ['#4caf50', '#2196f3', '#ff9800']
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
-    });
-  }
 </script>
-
 </body>
 </html>
